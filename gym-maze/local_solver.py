@@ -28,6 +28,8 @@ def local_inference(riddle_solvers):
         state_0 = obv
         action, action_index = select_action(state_0) # Random action
         obv, reward, terminated, truncated, info = manager.step(agent_id, action)
+        print("action", action)
+        print("obv", obv)
 
         if not info['riddle_type'] == None:
             solution = riddle_solvers[info['riddle_type']](info['riddle_question'])
