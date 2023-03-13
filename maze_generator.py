@@ -1,4 +1,6 @@
 import os
+import sys
+sys.path.append('c://Users/omara/Desktop/VSCODE/DigitalSquad/gym-maze/')
 from gym_maze.envs.maze_view_2d import Maze
 import numpy as np
 import requests
@@ -97,5 +99,5 @@ if __name__ == "__main__":
             break
 
     print(maze.maze_cells)
-    np.save("../../sample_maze.npy", maze.maze_cells)
+    np.save("./sample_maze2.npy", maze.maze_cells)
 
