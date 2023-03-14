@@ -5,6 +5,12 @@ import json
 import jwt
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.backends import default_backend
+import amazoncaptcha
+from io import BytesIO as IO
+from PIL import Image
+import numpy as np
+
+
 
 # Defining BinarytoDecimal() function
 def BinaryToDecimal(binary):
@@ -134,15 +140,17 @@ def cipher_solver(question):
   return plaintext
 
 def captcha_solver(question):
-    # Return solution
-    pass
+  img = Image.fromarray(np.uint8(question), mode='L')
+  img_byte_arr = IO()
+  img.save(img_byte_arr, format='PNG')
+  return amazoncaptcha.AmazonCaptcha(img_byte_arr).solve()
 
 def pcap_solver(question):
     # Return solution
     pass
 
 def server_solver(question):
-  
+  # pass
   payload = jwt.decode(question,options={"verify_signature":False})
 
   payload["admin"]="true"
