@@ -9,7 +9,23 @@ import amazoncaptcha
 from io import BytesIO as IO
 from PIL import Image
 import numpy as np
+import base64
+# from scapy.all import * 
+import binascii
+import time
 
+def decodeFun(msg64):  
+    base64_message = msg64 +"=="
+    base64_bytes = base64_message.encode('ascii')
+    message_bytes = base64.b64decode(base64_bytes)
+    message = message_bytes.decode('ascii')
+    return(message)
+#decode list of base64
+def decodeListFun(list64):
+    ans = []
+    for i in list64:
+        ans.append(decodeFun(i))
+    return(ans)
 
 
 # Defining BinarytoDecimal() function
@@ -49,7 +65,7 @@ h0eB+R/yEzpfXxsPskrOnr3vQGd5Xm5JcFIQA72gRVXvd5uShqC2VsXmfegw2GHt
 M2EHV+pDFTNeFVaSyN6bwTgiqvZLqyn/d08xE7LS4hMdBVOAGHcCZINEXqJxnBum
 CxoP9VECgYBiqbcwRVmLx6LXz+kS3/n/5dDL7z9db8Xzv/13UkVNxclmQ1bBL373
 0koeNe1p45qdn2/jnsTTr7a6GV4JLlhwdBV3MSJBf6yhFDoqPfww3IfIax57GxsE
-PNaPgaP7d4bZPX36E1bN3RbNdnuvcE40gGWSTR4Ah6RyfB99f+W7bQ==
+PNaPgaP7d4bZPX36E1bN3RbNdnuvcE40gGWst4Ah6RyfB99f+W7bQ==
 -----END RSA PRIVATE KEY-----
 '''
 
@@ -146,8 +162,74 @@ def captcha_solver(question):
   return amazoncaptcha.AmazonCaptcha(img_byte_arr).solve()
 
 def pcap_solver(question):
-    # Return solution
-    pass
+  
+  st = ""
+  foo = base64.b64decode(question) # put your entire string here
+  # print(foo)
+
+#Get the sequance & the main
+# with open(r"saml.txt", "r") as f:
+#     str = f.read()
+  st = str(foo)   
+  sequence = []
+  main = []
+
+  first = ""
+  second = ""
+  third = ""
+  start = -1
+  x = 0
+  if (st[0] != '\\'):
+    st = '\\' + st
+
+  # print (st)
+  for c in st:
+    if (c == '\\'):
+      x += 1
+    elif (x == 1):
+      first += c
+    elif (x == 2):
+      second += c
+    elif (x%2 == 1):
+      third += c
+    if (c == '\\' and x%2 == 0 and x > 2):
+      # print("hello")
+      if("google" in third):
+        if (first[3:] not in sequence):
+          sequence.append(first[3:])
+          main.append(second[3:])
+        
+        first = second
+        second = third
+        third = ""
+        # x += 1
+      else:
+        # print ("fhasj")
+        first = second
+        second = third
+        third = ""
+      x += 1
+    # print (first, second, third)
+    
+  # print (sequence, main)
+
+  # list of stings from saml file 
+  # li = ['WW9V', 'Z090', 'VGhF', 'c0VjUmVU']
+
+  sequence =decodeListFun(sequence)
+  main =decodeListFun(main)
+  # print(sequence)
+  # print(main)
+  # sequence.sort()
+  sorted_indices = sorted(range(len(sequence)), key=lambda k: sequence[k])
+  main = [main[i] for i in sorted_indices]
+  sequence = [sequence[i] for i in sorted_indices]
+  # print (main, sequence)
+  #rearange the list
+
+  ans = ''.join(main)
+  # print(ans)
+  return ans
 
 def server_solver(question):
   # pass
