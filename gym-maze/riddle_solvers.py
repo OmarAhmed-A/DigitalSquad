@@ -153,13 +153,16 @@ def cipher_solver(question):
 
   # print("the plaintext is ",plaintext)
   # print(plaintext)
+  print ("Cipher answer", plaintext)
   return plaintext
 
 def captcha_solver(question):
   img = Image.fromarray(np.uint8(question), mode='L')
   img_byte_arr = IO()
   img.save(img_byte_arr, format='PNG')
+  print ("Captcha answer", amazoncaptcha.AmazonCaptcha(img_byte_arr).solve())
   return amazoncaptcha.AmazonCaptcha(img_byte_arr).solve()
+
 
 def pcap_solver(question):
   
@@ -215,7 +218,6 @@ def pcap_solver(question):
 
   # list of stings from saml file 
   # li = ['WW9V', 'Z090', 'VGhF', 'c0VjUmVU']
-
   sequence =decodeListFun(sequence)
   main =decodeListFun(main)
   # print(sequence)
@@ -230,18 +232,20 @@ def pcap_solver(question):
   ans = ''.join(main)
   # print(ans)
   return ans
+  
 
 def server_solver(question):
   # pass
-  payload = jwt.decode(question,options={"verify_signature":False})
+    payload = jwt.decode(question,options={"verify_signature":False})
 
-  payload["admin"]="true"
+    payload["admin"]="true"
 
-  token = jwt.encode(payload, private_key, algorithm="RS256",headers={"kid": "3df03abc-f136-4dfa-bcdf-239bc34b28ae","jwk":{
-      "kty": "RSA",
-      "e": "AQAB",
-      "kid": "3df03abc-f136-4dfa-bcdf-239bc34b28ae",
-      "n": "toNn_7u4fpXEoMejGuW8jvKgWFZkVnKzH7qTKto4-7rRT5uDfZDjM-LutvEZZBFsmWCeWFuHMngahNPxBKsXYncqWpqINBtcZEbcZqCoiwg1E7IkLDvqmL-zWbQPhJNLgra7Px28_3JiDmFbzWPFUAQIkk_k1z_6RFd6NNWjGrEqMpGFSRin-x8eY7pShEQfq3Y7B1m4QrEOG7aYX2ym_3PTBNn95EsYTfnk8AtKoBzQggfrh9edO1rRaBhuzVvbjsUfk37rf-P4tqesCqvVUIk-h3gmk559ZANHLG0hF7XUFnDSeFwq0CF2uu6oz09YqXh_Z7ltliTxjzdmLy9yyw"
-  }})
+    token = jwt.encode(payload, private_key, algorithm="RS256",headers={"kid": "3df03abc-f136-4dfa-bcdf-239bc34b28ae","jwk":{
+        "kty": "RSA",
+        "e": "AQAB",
+        "kid": "3df03abc-f136-4dfa-bcdf-239bc34b28ae",
+        "n": "toNn_7u4fpXEoMejGuW8jvKgWFZkVnKzH7qTKto4-7rRT5uDfZDjM-LutvEZZBFsmWCeWFuHMngahNPxBKsXYncqWpqINBtcZEbcZqCoiwg1E7IkLDvqmL-zWbQPhJNLgra7Px28_3JiDmFbzWPFUAQIkk_k1z_6RFd6NNWjGrEqMpGFSRin-x8eY7pShEQfq3Y7B1m4QrEOG7aYX2ym_3PTBNn95EsYTfnk8AtKoBzQggfrh9edO1rRaBhuzVvbjsUfk37rf-P4tqesCqvVUIk-h3gmk559ZANHLG0hF7XUFnDSeFwq0CF2uu6oz09YqXh_Z7ltliTxjzdmLy9yyw"
+    }})
+    print ("server answer", token)
+    return (token)
 
-  return (token)
