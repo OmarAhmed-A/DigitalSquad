@@ -12,22 +12,18 @@ from riddle_solvers import *
 #### working professionals track --> 13.49.133.141
 server_ip = '16.170.85.45'
 
-def select_action(state):
-    # This is a random agent 
-    # This function should get actions from your trained agent when inferencing.
-    actions = ['N', 'S', 'E', 'W']
-    random_action = random.choice(actions)
-    action_index = actions.index(random_action)
-    return random_action, action_index
 
+# curr = [0,0]
 flag = 0
 dir = [[0 for i in range(10)] for j in range(10)] # number of directions
 visited = [[False for i in range(11)] for j in range(11)] # bool 
 come_from = [[[-1,-1] for i in range(10)] for j in range(10)] # previous node
 prev_state = [0, 0]
 temp = [1,1]
-N_Visited = 0
+N_Visited = set()
 go_back = False
+End_path = []
+
 
 def select_action(state):
 
@@ -37,24 +33,29 @@ def select_action(state):
     global N_Visited
     global End_path
     idx = [(0, -1),(0,1),(1,0),(-1,0)]
+    # idx = [(0,1),(0, -1),(1,0),(-1,0)]
+    # idx = [(1,0),(0,1),(0, -1),(-1,0)]
     # This is a random agent 
     # This function should get actions from your trained agent when inferencing.
     actions = ['N', 'S', 'E', 'W']
+    # actions = [ 'S','N', 'E', 'W']
+    # actions = [ 'E','S','N',  'W']
     x = state[0][0]
     y = state[0][1]
+    N_Visited.add((x,y))
+    
     print ("init", state[0], prev_state, dir[x][y])
     while (True):
       if ((x,y) == (0,0)):
         
         if (flag%2 == 0):
           print("ZZZZZZZZZZ")
-          action = actions[2]
+          action = actions[1]
           flag += 1
         else:
-          action = actions[1]
+          action = actions[2]
         print (action, (x,y))
         visited [x][y] = True
-        N_Visited += 1
         action_index = actions.index(action)
         dir[x][y] += 1 # add direction taken
         prev_state = [0,0]
@@ -69,7 +70,7 @@ def select_action(state):
         temp[1] = y + idx[next][1]
         print("temp", temp)
         if (temp[0] >= 0 and temp[0] < 10 and temp[1] >= 0 and temp[1] < 10): # if valid
-          if (come_from[x][y] != temp and visited[temp[0]][temp[1]] == False): # not comming from upcomong node
+          if (come_from[x][y] != temp): # not comming from upcomong node
             action = actions[next]
             action_index = actions.index(action)
             print(action)
@@ -97,7 +98,6 @@ def select_action(state):
         print ("move ",state[0],prev_state,  dir[x][y])
         
         visited[x][y] = True
-        N_Visited += 1
         if(come_from[x][y] == [-1,-1]):
           come_from[x][y]= prev_state
         prev_state = [x,y]
@@ -109,7 +109,7 @@ def select_action(state):
         # print (temp)
         print("temp", temp)
         if (temp[0] >= 0 and temp[0] < 10 and temp[1] >= 0 and temp[1] < 10):
-          if(visited[temp[0]][temp[1]] == False):
+          if((temp[0],temp[1]) not in N_Visited):
             action = actions[next]
             action_index = actions.index(action)
             print(action)
@@ -120,8 +120,9 @@ def select_action(state):
       else:
         print ("prev",prev_state, state[0], dir[x][y] )
         print("XXXXXXXX")
-        break
-  
+        # break
+        
+   
 
 def move(agent_id, action):
     response = requests.post(f'http://{server_ip}:5000/move', json={"agentId": agent_id, "action": action})
@@ -140,44 +141,106 @@ def get_obv_from_response(response):
     return obv
 
 cnt = 0 
+riddles_counter = set()
 def submission_inference(riddle_solvers):
 
     response = requests.post(f'http://{server_ip}:5000/init', json={"agentId": agent_id})
     obv = get_obv_from_response(response)
     global cnt
+  
     while(True):
-      if (cnt < 250):
-        cnt +=1
-        print (cnt)
-        # Select an action
+      cnt +=1
+      print ("steps: ", cnt)
+      if (cnt > 51):
+        if (cnt > 50 and cnt < 92):
+          # Select an action
+          # time.sleep(0.001)
+          state_0 = obv
+          action, action_index = select_action(state_0) # Random action
+          response = move(agent_id, action)
+          with open("output.txt", "a") as f:
+            print(response, file=f)
+          if not response.status_code == 200:
+            print(response)
+            break
+          
+          obv = get_obv_from_response(response)
+          print(response.json())
+          print ("rescued from info",response.json()['rescuedItems'])
+          
+          if not response.json()['riddleType'] == None:
+            solution = riddle_solvers[response.json()['riddleType']](response.json()['riddleQuestion'])
+            response = solve(agent_id, response.json()['riddleType'], solution)
+            riddles_counter.add(response.json()['riddleType'])
+            
+          if ( response.json()['rescuedItems'] > 1):
+            print ("A&AAAAAAAAAAA11111")
+            response = requests.post(f'http://{server_ip}:5000/leave', json={"agentId": agent_id})
+            break
+          
+          
+        elif(cnt > 50 and cnt < 130):
+          state_0 = obv
+          action, action_index = select_action(state_0) # Random action
+          response = move(agent_id, action)
+          with open("output.txt", "a") as f:
+            print(response, file=f)
+          if not response.status_code == 200:
+            print(response)
+            break
+          obv = get_obv_from_response(response)
+          print(response.json())
+          
+          # print ("rescued from info",info['rescued_items'])
+          if not response.json()['riddleType'] == None:
+            solution = riddle_solvers[response.json()['riddleType']](response.json()['riddleQuestion'])
+            response = solve(agent_id, response.json()['riddleType'], solution)
+            riddles_counter.add(response.json()['riddleType'])
+          if ( response.json()['rescuedItems'] > 2):
+            print ("A&AAAAAAAAA222222")
+            response = requests.post(f'http://{server_ip}:5000/leave', json={"agentId": agent_id})
+            break
+          
+        else:
+          print ("A& FINAL")
+          response = requests.post(f'http://{server_ip}:5000/leave', json={"agentId": agent_id})
+          break # Stop Agent
+        
+        
+      else:
         state_0 = obv
         action, action_index = select_action(state_0) # Random action
         response = move(agent_id, action)
+        with open("output.txt", "a") as f:
+            print(response, file=f)
         if not response.status_code == 200:
-            print(response)
-            break
-
+          print(response)
+          break
+        
         obv = get_obv_from_response(response)
         print(response.json())
-
+        
         if not response.json()['riddleType'] == None:
-            solution = riddle_solvers[response.json()['riddleType']](response.json()['riddleQuestion'])
-            response = solve(agent_id, response.json()['riddleType'], solution)
-
-
-        # THIS IS A SAMPLE TERMINATING CONDITION WHEN THE AGENT REACHES THE EXIT
-        # IMPLEMENT YOUR OWN TERMINATING CONDITION
-        if np.array_equal(response.json()['position'], (9,9)):
-            response = requests.post(f'http://{server_ip}:5000/leave', json={"agentId": agent_id})
-            break
-      else:
-        response = requests.post(f'http://{server_ip}:5000/leave', json={"agentId": agent_id})
-        break
+          solution = riddle_solvers[response.json()['riddleType']](response.json()['riddleQuestion'])
+          response = solve(agent_id, response.json()['riddleType'], solution)
+          riddles_counter.add(response.json()['riddleType'])
+        
+      
 
 
 if __name__ == "__main__":
     
-    agent_id = ""
+    with open("output.txt", "w") as f:
+      print("start", file=f)
+    
+    
+    agent_id = "VdGcOBaRlk"
     riddle_solvers = {'cipher': cipher_solver, 'captcha': captcha_solver, 'pcap': pcap_solver, 'server': server_solver}
     submission_inference(riddle_solvers)
+    print (riddles_counter, len(riddles_counter))
+    
+    with open("output.txt", "a") as f:
+      print("END", file=f)
+    f.close()
+    
     
