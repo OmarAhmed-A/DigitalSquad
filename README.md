@@ -4,7 +4,7 @@ This is a project created for the Dell HackTrick2023 hackathon. The project invo
 
 ## Story
 
-[image of us at dell](./Photos/photo_2023-03-17_23-42-34.jpg)
+![image of us at dell](./Photos/photo_2023-03-17_23-42-34.jpg)
 
 Initially, we attempted to use Stable Baselines to train a reinforcement learning (RL) agent, but we quickly encountered compatibility issues with the maze environment. Undeterred, we decided to build a Deep Q-Network (DQN) algorithm from scratch using PyTorch. Unfortunately, we faced another setback as the training didn't converge, leaving us no choice but to explore other avenues.
 
