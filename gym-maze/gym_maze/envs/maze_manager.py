@@ -21,7 +21,7 @@ class MazeManager():
 
     def init_maze(self, agent_id, maze_cells=None):
         if(hasattr(maze_cells, 'shape')):
-            env = gym.make('maze-sample-10x10-v0', rescue_item_locations= list(self.rescue_items_dict.keys()), maze_cells=maze_cells, enable_render=True)
+            env = gym.make('maze-sample-10x10-v0', rescue_item_locations= list(self.rescue_items_dict.keys()), maze_cells=maze_cells, enable_render=False)
             self.maze_map[agent_id] = env
             state = self.maze_map[agent_id].reset()
             env = None
@@ -246,7 +246,11 @@ class RiddleContainer():
         self.server_riddle.set_solved(False)
         self.pcap_riddle.set_solved(False)
         self.captcha_riddle.set_solved(False)
-
+        
+        self.cipher_riddle.attempts = 0
+        self.server_riddle.attempts = 0
+        self.pcap_riddle.attempts = 0
+        self.captcha_riddle.attempts = 0
 
     
 class Riddle:
