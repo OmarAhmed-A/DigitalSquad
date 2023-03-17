@@ -25,8 +25,35 @@ go_back = False
 End_path = []
 
 
-def select_action(state):
+dir = [[0 for i in range(10)] for j in range(10)]             # number of directions
+visited = [[False for i in range(11)] for j in range(11)]     # bool 
+come_from = [[[-1,-1] for i in range(10)] for j in range(10)] # previous node
+blocked = [[[] for i in range(11)] for j in range(11)]   # Blocked
+prev_state = [0, 0]
+temp = [1,1]
+N_Visited = set()
+go_back = False
+End_path = []
 
+
+# print (blocked)
+# def reverse_action():
+#   global End_path
+#   actions = ['N', 'S', 'E', 'W']
+#   for action in End_path:
+#     a = actions.index(action)
+#     if (a == 1 or a == 3):
+#       a -= 1
+#     else:
+#       a += 1
+
+def take_desicion(steps_back, rescue_items):
+  score_now = ((rescue_items *  250) * (rescue_items/steps)) * 0.8
+  goto_exit = ((rescue_items *  250) * (rescue_items/steps + steps_back))
+  
+  
+def select_action(state):
+    print (state)
     global prev_state
     global flag
     global go_back
@@ -44,7 +71,8 @@ def select_action(state):
     y = state[0][1]
     N_Visited.add((x,y))
     
-    print ("init", state[0], prev_state, dir[x][y])
+    print ("init", state[0][0], prev_state, dir[x][y])
+    
     while (True):
       if ((x,y) == (0,0)):
         
@@ -64,18 +92,27 @@ def select_action(state):
       if (state[0][0] == prev_state[0] and state[0][1] == prev_state[1] and dir[x][y] < 4): # have direction move (same location)
         go_back = False
         print ("try another direction ",prev_state, state[0], dir[x][y])
-        next = dir[x][y] 
+        
+        next = dir[x][y]
+        
+        blocked_idx = next -1
+        b1 = x + idx[blocked_idx][0]
+        b2 = y + idx[blocked_idx][1]
+        blocked[b1][b2].append((x,y))
+        print("Current: ", state[0],"blocked: ", blocked[x][y])
         # check that it is not prev
-        temp[0] = x + idx[next][0]
-        temp[1] = y + idx[next][1]
+        a = x + idx[next][0]
+        b = y + idx[next][1]
+        
         print("temp", temp)
-        if (temp[0] >= 0 and temp[0] < 10 and temp[1] >= 0 and temp[1] < 10): # if valid
-          if (come_from[x][y] != temp): # not comming from upcomong node
-            action = actions[next]
-            action_index = actions.index(action)
-            print(action)
-            dir[x][y] += 1 # add direction take
-            return action, action_index
+        if (a >= 0 and a < 10 and b >= 0 and b < 10): # if valid
+          if (come_from[x][y] != [a,b]): # not comming from upcomong node
+            if ((a,b) not in blocked[x][y]):
+              action = actions[next]
+              action_index = actions.index(action)
+              print(action)
+              dir[x][y] += 1 # add direction take
+              return action, action_index
         dir[x][y] += 1 # add direction take
         continue
       elif ( dir[x][y] >= 4 ): # go back
@@ -99,29 +136,30 @@ def select_action(state):
         
         visited[x][y] = True
         if(come_from[x][y] == [-1,-1]):
-          come_from[x][y]= prev_state
+          come_from[x][y] = prev_state
         prev_state = [x,y]
         
         next = dir[x][y] 
-        temp[0]  = x + idx[next][0]
-        temp[1]  = y + idx[next][1]
+        a  = x + idx[next][0]
+        b  = y + idx[next][1]
         # if(come_from[x][y][0] )
         # print (temp)
         print("temp", temp)
-        if (temp[0] >= 0 and temp[0] < 10 and temp[1] >= 0 and temp[1] < 10):
-          if((temp[0],temp[1]) not in N_Visited):
-            action = actions[next]
-            action_index = actions.index(action)
-            print(action)
-            dir[x][y] += 1 # add direction taken
-            return action, action_index
+        if (a >= 0 and a < 10 and b >= 0 and b < 10):
+          if((a,b) not in N_Visited):
+            if ((a,b) not in blocked[x][y]):
+              action = actions[next]
+              action_index = actions.index(action)
+              print(action)
+              dir[x][y] += 1 # add direction taken
+              return action, action_index
           dir[x][y] += 1 # add direction take
           continue
       else:
         print ("prev",prev_state, state[0], dir[x][y] )
         print("XXXXXXXX")
         # break
-        
+
    
 
 def move(agent_id, action):
