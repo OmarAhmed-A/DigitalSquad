@@ -189,11 +189,11 @@ def submission_inference(riddle_solvers):
     obv = get_obv_from_response(response)
     global steps
   
-    while(True):
+    while(steps < 320):
       steps +=1
       print ("steps: ", steps)
       if (steps > 51):
-        if (steps > 50 and steps < 150):
+        if (steps > 50 and steps < 120):
           # Select an action
           # time.sleep(0.001)
           state_0 = obv
@@ -215,19 +215,20 @@ def submission_inference(riddle_solvers):
             response = solve(agent_id, response.json()['riddleType'], solution)
             riddles_counter.add(response.json()['riddleType'])
           
-          if (steps < 61 and  response.json()['rescuedItems'] > 1): # 2 riddles
+          if (steps < 65 and  response.json()['rescuedItems'] > 1): # 2 riddles
             print (f"out within 60 with 2 in {steps} steps")
             response = requests.post(f'http://{server_ip}:5000/leave', json={"agentId": agent_id})
             break
+          
           if ( response.json()['rescuedItems'] > 2):
             print (f"out within 110 with 2 in {steps} steps")
             response = requests.post(f'http://{server_ip}:5000/leave', json={"agentId": agent_id})
             break
           
           
-        elif(steps > 149 and steps < 222):
+        elif(steps > 119 and steps < 200):
           state_0 = obv
-          action, action_index = select_action(state_0) # Random action
+          action, action_index = select_action(state_0) 
           response = move(agent_id, action)
           
           with open("output.txt", "a") as f:
@@ -246,14 +247,19 @@ def submission_inference(riddle_solvers):
             riddles_counter.add(response.json()['riddleType'])
           
           if ( response.json()['rescuedItems'] > 3):
-            print (f"out within 200 with 3 in {steps} steps")
+            print (f"out within 200 with 4 in {steps} steps")
             response = requests.post(f'http://{server_ip}:5000/leave', json={"agentId": agent_id})
             break
         
-        elif (steps > 221):
+        elif (steps > 199):
           if np.array_equal(response.json()['position'], (9,9)) and response.json()['rescuedItems'] > 2:
             response = requests.post(f'http://{server_ip}:5000/leave', json={"agentId": agent_id})
             break
+          
+          elif (response.json()['rescuedItems'] > 2):
+            response = requests.post(f'http://{server_ip}:5000/leave', json={"agentId": agent_id})
+            break
+          
           else:
             state_0 = obv
             action, action_index = select_action(state_0) # Random action
@@ -300,7 +306,6 @@ if __name__ == "__main__":
     
     with open("output.txt", "w") as f:
       print("start", file=f)
-    
     
     agent_id = "3xP6rEjN7k"
     riddle_solvers = {'cipher': cipher_solver, 'captcha': captcha_solver, 'pcap': pcap_solver, 'server': server_solver}
