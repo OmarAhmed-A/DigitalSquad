@@ -193,7 +193,7 @@ def submission_inference(riddle_solvers):
       steps +=1
       print ("steps: ", steps)
       if (steps > 51):
-        if (steps > 50 and steps < 120):
+        if (steps > 50 and steps < 130):
           # Select an action
           # time.sleep(0.001)
           state_0 = obv
@@ -215,7 +215,7 @@ def submission_inference(riddle_solvers):
             response = solve(agent_id, response.json()['riddleType'], solution)
             riddles_counter.add(response.json()['riddleType'])
           
-          if (steps < 65 and  response.json()['rescuedItems'] > 1): # 2 riddles
+          if (steps < 55 and  response.json()['rescuedItems'] > 1): # 2 riddles
             print (f"out within 60 with 2 in {steps} steps")
             response = requests.post(f'http://{server_ip}:5000/leave', json={"agentId": agent_id})
             break
@@ -226,7 +226,7 @@ def submission_inference(riddle_solvers):
             break
           
           
-        elif(steps > 119 and steps < 200):
+        elif(steps > 129 and steps < 200):
           state_0 = obv
           action, action_index = select_action(state_0) 
           response = move(agent_id, action)
