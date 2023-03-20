@@ -228,12 +228,13 @@ if __name__ == "__main__":
     agent_id = "9" # add your agent id here
     
     manager = MazeManager()
-    manager.init_maze(agent_id, maze_cells=sample_maze)
+    manager.init_maze(agent_id, maze_cells=sample_maze, )
     env = manager.maze_map[agent_id]
 
     riddle_solvers = {'cipher': cipher_solver, 'captcha': captcha_solver, 'pcap': pcap_solver, 'server': server_solver}
     maze = {}
     states = {}
+    # vis 
 
     
     maze['maze'] = env.maze_view.maze.maze_cells.tolist()
