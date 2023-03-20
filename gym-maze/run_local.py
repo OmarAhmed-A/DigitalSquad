@@ -9,13 +9,18 @@ import gym
 import gym_maze
 from gym_maze.envs.maze_manager import MazeManager
 from riddle_solvers import *
+import logging
 
-# curr = [0,0]
+logging.basicConfig(filename=r"D:\Github\DigitalSquad\gym-maze\logging.log", level=logging.DEBUG, filemode='w')
+logging.debug('This message should appear on the console') 
+
 flag = 0
-dir = [[0 for i in range(10)] for j in range(10)]             # number of directions
-visited = [[False for i in range(11)] for j in range(11)]     # bool 
-come_from = [[[-1,-1] for i in range(10)] for j in range(10)] # previous node
-blocked = [[[] for i in range(11)] for j in range(11)]   # Blocked
+reach_END = False
+backToEnd = []
+dir = [[0 for i in range(10)] for j in range(10)]             # number of avalible directions
+visited = [[False for i in range(11)] for j in range(11)]     # bool for visited nodes
+come_from = [[[-1,-1] for i in range(10)] for j in range(10)] # previous node for each node
+blocked = [[[] for i in range(11)] for j in range(11)]        # Blocked
 prev_state = [0, 0]
 temp = [1,1]
 N_Visited = set()
@@ -23,7 +28,7 @@ go_back = False
 End_path = []
 
 
-# print (blocked)
+# logging.debug (blocked)
 # def reverse_action():
 #   global End_path
 #   actions = ['N', 'S', 'E', 'W']
@@ -34,8 +39,17 @@ End_path = []
 #     else:
 #       a += 1
 
+def GoToExit(steps_back, rescue_items):
+  score_now = ((rescue_items *  250) * (rescue_items/steps)) * 0.8
+  goto_exit = ((rescue_items *  250) * (rescue_items/steps + steps_back))
+  if(score_now > goto_exit):
+    manager.set_done(agent_id)
+    return 0
+    
+  
+
 def select_action(state):
-    print (state)
+    # logging.debug (state)
     global prev_state
     global flag
     global go_back
@@ -53,27 +67,29 @@ def select_action(state):
     y = state[0][1]
     N_Visited.add((x,y))
     
-    print ("init", state[0][0], prev_state, dir[x][y])
+    logging.debug (f"init {state[0][0]}, {prev_state}, { dir[x][y]} ")
     
     while (True):
       if ((x,y) == (0,0)):
         
         if (flag%2 == 0):
-          print("ZZZZZZZZZZ")
+          logging.debug("first node")
           action = actions[1]
           flag += 1
         else:
           action = actions[2]
-        print (action, (x,y))
+        
+        logging.debug (f"action ({x},{y}")
         visited [x][y] = True
         action_index = actions.index(action)
         dir[x][y] += 1 # add direction taken
         prev_state = [0,0]
-        print(action)
+        logging.debug(action)
         return action, action_index
+      
       if (state[0][0] == prev_state[0] and state[0][1] == prev_state[1] and dir[x][y] < 4): # have direction move (same location)
         go_back = False
-        print ("try another direction ",prev_state, state[0], dir[x][y])
+        logging.debug (f"try another direction {prev_state}, {state[0]}, {dir[x][y]}")
         
         next = dir[x][y]
         
@@ -81,28 +97,28 @@ def select_action(state):
         b1 = x + idx[blocked_idx][0]
         b2 = y + idx[blocked_idx][1]
         blocked[b1][b2].append((x,y))
-        print("Current: ", state[0],"blocked: ", blocked[x][y])
+        logging.debug(f"Current: { state[0]}, blocked: {blocked[x][y]}")
         # check that it is not prev
         a = x + idx[next][0]
         b = y + idx[next][1]
         
-        print("temp", temp)
+        logging.debug(f"temp: {temp}")
         if (a >= 0 and a < 10 and b >= 0 and b < 10): # if valid
           if (come_from[x][y] != [a,b]): # not comming from upcomong node
             if ((a,b) not in blocked[x][y]):
               action = actions[next]
               action_index = actions.index(action)
-              print(action)
+              logging.debug(action)
               dir[x][y] += 1 # add direction take
               return action, action_index
         dir[x][y] += 1 # add direction take
         continue
       elif ( dir[x][y] >= 4 ): # go back
-        print ("go back ",prev_state, state[0], come_from[x][y])
+        logging.debug (f"go back {prev_state} {state[0]} {come_from[x][y]}")
         prev_state = [x,y]
         z = x - come_from[x][y][0]
         s = y - come_from[x][y][1]
-        print(z,s)
+        logging.debug(f"{z},{s}")
         Rback = idx.index((z,s))
         if (Rback == 1 or Rback == 3):
           Rback -= 1
@@ -110,11 +126,11 @@ def select_action(state):
           Rback += 1
         action = actions[Rback]
         action_index = actions.index(action)
-        print(action)
+        logging.debug(action)
         return action, action_index
       elif ((state[0][0] != prev_state[0] or state[0][1] != prev_state[1]) and dir[x][y] < 4): # move
         go_back = False
-        print ("move ",state[0],prev_state,  dir[x][y])
+        logging.debug (f"move {state[0]} {state[0]} {prev_state} {dir[x][y]}")
         
         visited[x][y] = True
         if(come_from[x][y] == [-1,-1]):
@@ -125,21 +141,21 @@ def select_action(state):
         a  = x + idx[next][0]
         b  = y + idx[next][1]
         # if(come_from[x][y][0] )
-        # print (temp)
-        print("temp", temp)
+        # logging.debug (temp)
+        logging.debug(f"temp {temp}")
         if (a >= 0 and a < 10 and b >= 0 and b < 10):
           if((a,b) not in N_Visited):
             if ((a,b) not in blocked[x][y]):
               action = actions[next]
               action_index = actions.index(action)
-              print(action)
+              logging.debug(action)
               dir[x][y] += 1 # add direction taken
               return action, action_index
           dir[x][y] += 1 # add direction take
           continue
       else:
-        print ("prev",prev_state, state[0], dir[x][y] )
-        print("XXXXXXXX")
+        logging.debug ("prev {prev_state}, {state[0]}, {dir[x][y]}")
+        logging.debug("Dead End")
         # break
         
         
@@ -148,74 +164,113 @@ def select_action(state):
       # action_index = actions.index(action)
       # return action, action_index
 
-cnt = 0
+steps = 0
 def local_inference(riddle_solvers):
     # actions = ['N', 'S', 'E', 'W']
     obv = manager.reset(agent_id)
     # global flag
-    global cnt
+    global steps
     global N_Visited
+    global reach_END
+    
     info = {'rescued_items': 0, 'riddle_type': None, 'riddle_question': None}
-    for t in range(MAX_T):
-      time.sleep(0.1)
-      cnt +=1
-      print ("steps: ", cnt)
-      if (cnt > 51):
-        if (cnt > 50 and cnt < 92):
+    
+    for t in range(300):
+      
+      time.sleep(0.01)
+      steps +=1
+      print("steps: ",steps)
+      logging.debug (f"steps: {steps}")
+      state_0 = obv
+        
+      
+      if (steps > 51):
+        if (steps > 50 and steps < 111): # Worst case with 3 riddles (16 PT)
           # Select an action
-          state_0 = obv
-          action, action_index = select_action(state_0) # Random action
+          
+          action, action_index = select_action(state_0) 
           obv, reward, terminated, truncated, info = manager.step(agent_id, action)
           print ("rescued from info",info['rescued_items'])
+          
           if not info['riddle_type'] == None:
               solution = riddle_solvers[info['riddle_type']](info['riddle_question'])
               obv, reward, terminated, truncated, info = manager.solve_riddle(info['riddle_type'], agent_id, solution)
-          if ( info['rescued_items'] > 1):
-            print ("A&AAAAAAAAAAA11111")
-            # manager.set_done(agent_id)
-            # break
-          # print(len(N_Visited))
-          # riddle_solvers[info['riddle_type']]
-          #   flag = 1
-          # if (flag):
-          #   End_path.append(action)
-        # else:
-        #   reverse_action()
-        #   End_path.reverse()
-        #   for p in End_path:
-        #     action, action_index = p, actions.index(p) # Random action
-        #     obv, reward, terminated, truncated, info = manager.step(agent_id, action)
-        # # THIS IS A SAMPLE TERMINATING CONDITION WHEN THE AGENT REACHES THE EXIT
-          # print(visited)
-        elif(cnt > 50 and cnt < 1300):
-          state_0 = obv
-          action, action_index = select_action(state_0) # Random action
+          
+          if (steps < 61 and info['rescued_items'] > 1): # 2 riddles
+            print (f"out within 60 with 2 in {steps} steps")
+            manager.set_done(agent_id)
+            break
+          
+          if (info['rescued_items'] > 2): # 3 riddles
+            print (f"out within 110 with 2 in {steps} steps")
+            manager.set_done(agent_id)
+            break
+          
+        elif(steps > 110 and steps < 200): # 4 riddles (Worst = 16 PT)
+          
+          action, action_index = select_action(state_0) 
           obv, reward, terminated, truncated, info = manager.step(agent_id, action)
           print ("resude from info",info['rescued_items'])
+          
           if not info['riddle_type'] == None:
               solution = riddle_solvers[info['riddle_type']](info['riddle_question'])
               obv, reward, terminated, truncated, info = manager.solve_riddle(info['riddle_type'], agent_id, solution)
-          if ( info['rescued_items'] > 2):
-            print ("A&AAAAAAAAAAA22222222")
-            # manager.set_done(agent_id)
-            # break
+          
+          if ( info['rescued_items'] > 3):
+            print (f"out within 200 with 3 in {steps} steps")
+            manager.set_done(agent_id)
+            break
         
+        elif( steps >= 200): # have 3 riddles 9 point
+          print ((9,9) in N_Visited, len(N_Visited))
+          if ((9,9) in N_Visited):
+            
+            if (info['rescued_items'] > 2):
+                manager.set_done(agent_id)
+                break # Stop Agent
+              # calculate the best desicion to go back or exit
+              
+            else:
+              action, action_index = select_action(state_0) 
+              obv, reward, terminated, truncated, info = manager.step(agent_id, action)
+              
+              if not info['riddle_type'] == None:
+                solution = riddle_solvers[info['riddle_type']](info['riddle_question'])
+                obv, reward, terminated, truncated, info = manager.solve_riddle(info['riddle_type'], agent_id, solution)
+              print ("resude from info",info['rescued_items'])
+          elif ((9,9) not in N_Visited):
+            
+            action, action_index = select_action(state_0) 
+            obv, reward, terminated, truncated, info = manager.step(agent_id, action)
+            print ("resude from info",info['rescued_items'])
+            if not info['riddle_type'] == None:
+                solution = riddle_solvers[info['riddle_type']](info['riddle_question'])
+                obv, reward, terminated, truncated, info = manager.solve_riddle(info['riddle_type'], agent_id, solution)
+          # elif (info['rescued_items'] > 2 and (9,9) in N_Visited): # calculate the best desicion to go back or exit
+          
+          
+          
+          if(info['rescued_items'] > 2 and np.array_equal(obv[0], (9,9))): # Exit at (9,9) with 3 or more
+            logging.debug ("out in more that 200 with 3 or more with exit")
+            manager.set_done(agent_id)
+            break # Stop Agent
+        # elif (len(N_Visited)
         else:
           h = 3
-          print ("A&AAAAAAAAAAA")
+          logging.debug ("A&AAAAAAAAAAA")
           manager.set_done(agent_id)
           break # Stop Agent
       else:
-        state_0 = obv
-        action, action_index = select_action(state_0) # Random action
+        
+        action, action_index = select_action(state_0) 
         obv, reward, terminated, truncated, info = manager.step(agent_id, action)
-        print ("resude from info",info['rescued_items'])
+        print("resude from info",info['rescued_items'])
         if not info['riddle_type'] == None:
             solution = riddle_solvers[info['riddle_type']](info['riddle_question'])
             obv, reward, terminated, truncated, info = manager.solve_riddle(info['riddle_type'], agent_id, solution)
         # if np.array_equal(obv[0], (9,9)):
       # # IMPLEMENT YOUR OWN TERMINATING CONDITION
-        # if np.array_equal(obv[0], (9,9)):
+        # if np.array_equal(obv[0], (9,9)):s
       if RENDER_MAZE:
         manager.render(agent_id)
 
@@ -228,13 +283,12 @@ if __name__ == "__main__":
     agent_id = "9" # add your agent id here
     
     manager = MazeManager()
-    manager.init_maze(agent_id, maze_cells=sample_maze, )
+    manager.init_maze(agent_id, maze_cells=sample_maze)
     env = manager.maze_map[agent_id]
 
     riddle_solvers = {'cipher': cipher_solver, 'captcha': captcha_solver, 'pcap': pcap_solver, 'server': server_solver}
     maze = {}
     states = {}
-    # vis 
 
     
     maze['maze'] = env.maze_view.maze.maze_cells.tolist()
