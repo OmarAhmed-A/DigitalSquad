@@ -54,6 +54,18 @@ The RL approach didn't work as expected, so we decided to use an algorithmic app
 4. Find the shortest path from the children to the exit.
 5. Repeat steps 2, 3 and 4 until all the children are rescued.
 
+Our approach to solve them can be found in [gym-maze\riddle_solvers.py](gym-maze/riddle_solvers.py).
+
+### Project Structure
+
+#### AI and ML
+
+The AI and ML part of the project is located in the [WorkingDQN](WorkingDQN) directory. The `WorkingDQN` directory contains the final Algorithim that we reached before switching to the algorithmic approach. it can be found in the [WorkingDQN\FinalDQN.ipynb](WorkingDQN/FinalDQN.ipynb) file.
+
+#### Algorithmic Approach
+
+The algorithmic approach is located in the `gym-maze` directory. The local solver can be found in the [gym-maze\local_solver_with_exit.py](gym-maze/local_solver_with_exit.py) file. The remote solver can be found in the [gym-maze\submission_solver.py](gym-maze/submission_solver.py) file.
+
 #### Cybersecurity
 
 There are four types of riddles to solve in the maze:
@@ -62,18 +74,6 @@ There are four types of riddles to solve in the maze:
 2. A jwt token that needs to be decoded, edited to make the user an admin, and then encoded again.
 3. A Cipher text that needs to be decrypted.
 4. A Pcap file that needs to be analyzed to find the flag.
-
-Our approach to solve them can be found in [gym-maze\riddle_solvers.py](gym-maze/riddle_solvers.py).
-
-## Project Structure
-
-### AI and ML
-
-The AI and ML part of the project is located in the [WorkingDQN](WorkingDQN) directory. The `WorkingDQN` directory contains the final Algorithim that we reached before switching to the algorithmic approach. it can be found in the [WorkingDQN\FinalDQN.ipynb](WorkingDQN/FinalDQN.ipynb) file.
-
-### Algorithmic Approach
-
-The algorithmic approach is located in the `gym-maze` directory. The local solver can be found in the [gym-maze\local_solver_with_exit.py](gym-maze/local_solver_with_exit.py) file. The remote solver can be found in the [gym-maze\submission_solver.py](gym-maze/submission_solver.py) file.
 
 ## Contributors
 
