@@ -223,8 +223,10 @@ def local_inference(riddle_solvers):
 
 
 if __name__ == "__main__":
+    
 
-    sample_maze = np.load(r"/home/ec2-user/DigitalSquad/gym-maze/hackathon_sample.npy")
+    pathToMazeFile = "./hackathon_sample.npy" # add your path to the maze file here
+    sample_maze = np.load(pathToMazeFile)
     agent_id = "9" # add your agent id here
     
     manager = MazeManager()
@@ -241,7 +243,7 @@ if __name__ == "__main__":
     maze['rescue_items'] = list(manager.rescue_items_dict.keys())
 
     MAX_T = 5000
-    RENDER_MAZE = False
+    RENDER_MAZE = True
     
 
     local_inference(riddle_solvers)
