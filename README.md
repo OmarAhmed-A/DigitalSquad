@@ -54,8 +54,6 @@ The RL approach didn't work as expected, so we decided to use an algorithmic app
 4. Find the shortest path from the children to the exit.
 5. Repeat steps 2, 3 and 4 until all the children are rescued.
 
-Our approach to solve them can be found in [gym-maze\riddle_solvers.py](gym-maze/riddle_solvers.py).
-
 ### Project Structure
 
 #### AI and ML
@@ -74,6 +72,8 @@ There are four types of riddles to solve in the maze:
 2. A jwt token that needs to be decoded, edited to make the user an admin, and then encoded again.
 3. A Cipher text that needs to be decrypted.
 4. A Pcap file that needs to be analyzed to find the flag.
+
+Our approach to solve them can be found in [gym-maze\riddle_solvers.py](gym-maze/riddle_solvers.py).
 
 ## Contributors
 
